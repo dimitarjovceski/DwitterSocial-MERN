@@ -22,6 +22,10 @@ const registerUser = async (req, res) => {
   try {
     const { name, email, username, password } = req.body;
 
+    if (!name || !email || !username || !password) {
+      return res.status(400).json({ message: "All inputs are required!" });
+    }
+
     const user = await User.findOne({ $or: [{ email }, { username }] });
 
     if (user) {
@@ -58,6 +62,9 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
   try {
     const { username, password } = req.body;
+
+    if (!username || !password)
+      return res.status(400).json({ error: "Wrong Credentials" });
 
     const user = await User.findOne({ username });
 
