@@ -1,7 +1,7 @@
 import User from "../models/userModel.js";
 import bcryptjs from "bcryptjs";
 import { generateToken } from "../utils/generateToken.js";
-import jwt from "jsonwebtoken";
+import { v2 as cloudinary } from "cloudinary";
 
 const getUserProfile = async (req, res) => {
   try {
@@ -84,6 +84,7 @@ const loginUser = async (req, res) => {
       name: user.name,
       email: user.email,
       username: user.username,
+      profilePic: user.profilePic,
     });
   } catch (error) {
     console.log(error);
@@ -137,7 +138,8 @@ const followUnfollowUser = async (req, res) => {
 };
 
 const updateProfile = async (req, res) => {
-  const { name, username, email, password, bio, profilePic } = req.body;
+  const { name, username, email, password, bio } = req.body;
+  let { profilePic } = req.body;
   const userId = req.user._id;
 
   try {
@@ -156,6 +158,17 @@ const updateProfile = async (req, res) => {
       user.password = hashedPassword;
     }
 
+    if (profilePic) {
+      if (user.profilePic) {
+        await cloudinary.uploader.destroy(
+          user.profilePic.split("/").pop().split(".")[0]
+        );
+      }
+
+      const uploadedRes = await cloudinary.uploader.upload(profilePic);
+      profilePic = uploadedRes.secure_url;
+    }
+
     user.name = name || user.name;
     user.email = email || user.email;
     user.username = username || user.username;
@@ -164,7 +177,10 @@ const updateProfile = async (req, res) => {
 
     await user.save();
 
-    res.status(200).json({ message: "Profile updated successfully", user });
+    // password should be null at response
+    user.password = null;
+
+    res.status(200).json({ user });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Something went wrong" });

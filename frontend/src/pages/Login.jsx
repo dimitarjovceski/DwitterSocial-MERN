@@ -50,7 +50,7 @@ const Login = () => {
         return;
       }
 
-      localStorage.setItem("user", JSON.stringify({ username, password }));
+      localStorage.setItem("user", JSON.stringify(data));
       setUser(data);
       toast({
         position: "top-right",
