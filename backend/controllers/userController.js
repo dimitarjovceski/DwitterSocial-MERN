@@ -85,6 +85,7 @@ const loginUser = async (req, res) => {
       email: user.email,
       username: user.username,
       profilePic: user.profilePic,
+      bio: user.bio
     });
   } catch (error) {
     console.log(error);

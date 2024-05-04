@@ -20,11 +20,13 @@ const UpdateProfile = () => {
   const { handleImageChange, imageUrl } = usePreviewImage();
   const toast = useToast();
   const [user, setUser] = useRecoilState(userAtom);
+  const [updating, setUpdating] = useState(false);
   const [inputs, setInputs] = useState({
     name: user.name,
     username: user.username,
     email: user.email,
     password: user.password,
+    bio: user.bio,
   });
 
   const fileRef = useRef(null);
@@ -32,6 +34,7 @@ const UpdateProfile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    setUpdating(true);
     try {
       const res = await fetch(`/api/users/update/${user._id}`, {
         method: "PUT",
@@ -72,6 +75,8 @@ const UpdateProfile = () => {
         position: "top-right",
         status: "error",
       });
+    } finally {
+      setUpdating(false);
     }
   };
   return (
@@ -146,6 +151,16 @@ const UpdateProfile = () => {
             />
           </FormControl>
           <FormControl>
+            <FormLabel>Bio</FormLabel>
+            <Input
+              placeholder="Enter bio"
+              _placeholder={{ color: "gray.500" }}
+              type="text"
+              onChange={(e) => setInputs({ ...inputs, bio: e.target.value })}
+              value={inputs.bio}
+            />
+          </FormControl>
+          <FormControl>
             <FormLabel>Password</FormLabel>
             <Input
               placeholder="password"
@@ -176,6 +191,7 @@ const UpdateProfile = () => {
                 bg: "green.500",
               }}
               type="submit"
+              isLoading={updating}
             >
               Submit
             </Button>
